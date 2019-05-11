@@ -48,7 +48,9 @@ df.tweet_text = df.tweet_text.str.lower()
 
 # remove all stop words
 import nltk
-from nltk
+from nltk.corpus import stopwords
+stop = stopwords.words('english')
+df['tweet_text'] = df['tweet_text'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
 
 
 
