@@ -40,7 +40,7 @@ df.tweet_time = pd.to_datetime(df.tweet_time, format="%a %b %d %H:%M:%S  %Y")
 # remove hyperlinks
 df.tweet_text = df.tweet_text.str.replace(r'http\S+', r'')
 
-# remove unnecessary punctuation, tags
+# remove puncutation
 df.tweet_text = df.tweet_text.str.replace(r'[^\w\s]', r'')
 
 # convert all text to lowercase
