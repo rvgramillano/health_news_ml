@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 import os
+import nltk
+from nltk.corpus import stopwords
+from textblob import Word
 
 WORK_DIR = '/Users/rvg/Documents/other_projects/health_news_twitter/'
 NEWS_SOURCES = WORK_DIR + 'data/Health-Tweets/'
@@ -34,11 +37,22 @@ df.tweet_time.replace(regex=True, inplace=True, to_replace=r'(\+.{4})', value=r'
 
 # then convert to datetime
 df.tweet_time = pd.to_datetime(df.tweet_time, format="%a %b %d %H:%M:%S  %Y")
+df.index = df.tweet_time
+df.drop(['tweet_time'], axis=1, inplace=True)
 
 # now we clean up the tweet_text column
 
 # remove hyperlinks
-df.tweet_text = df.tweet_text.str.replace(r'http\S+', r'')
+df.tweet_text = df.tweet_text.str.replace(r'ht\S+', r'')
+
+# remove twitter mentions of other users
+df.tweet_text = df.tweet_text.str.replace(r'\@\S+', r'')
+
+# remove hashtag mentions
+df.tweet_text = df.tweet_text.str.replace(r'\#\S+', r'')
+
+#remove ampersand misrecordings
+df.tweet_text = df.tweet_text.str.replace(r'\&amp\;', r'')
 
 # remove puncutation
 df.tweet_text = df.tweet_text.str.replace(r'[^\w\s]', r'')
@@ -47,11 +61,17 @@ df.tweet_text = df.tweet_text.str.replace(r'[^\w\s]', r'')
 df.tweet_text = df.tweet_text.str.lower()
 
 # remove all stop words
-import nltk
-from nltk.corpus import stopwords
 stop = stopwords.words('english')
 df['tweet_text'] = df['tweet_text'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
 
+# common word removal
+freq = pd.Series(' '.join(df['tweet_text']).split()).value_counts()[:10]
 
+common_words = list(freq.index)
+df['tweet_text'] = df['tweet_text'].apply(lambda x: " ".join(x for x in x.split() if x not in common_words))
 
+# lemmatization
+df['tweet_text'] = df['tweet_text'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
 
+# save df for later analysis
+df.to_pickle(WORK_DIR + 'data/cleaned_df.pkl')
