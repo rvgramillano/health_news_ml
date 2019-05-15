@@ -54,6 +54,9 @@ df.tweet_text = df.tweet_text.str.replace(r'\#\S+', r'')
 #remove ampersand misrecordings
 df.tweet_text = df.tweet_text.str.replace(r'\&amp\;', r'')
 
+#remove digits
+df.tweet_text = df.tweet_text.str.replace(r'\d+', r'')
+
 # remove puncutation
 df.tweet_text = df.tweet_text.str.replace(r'[^\w\s]', r'')
 
@@ -63,12 +66,6 @@ df.tweet_text = df.tweet_text.str.lower()
 # remove all stop words
 stop = stopwords.words('english')
 df['tweet_text'] = df['tweet_text'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
-
-# common word removal
-freq = pd.Series(' '.join(df['tweet_text']).split()).value_counts()[:10]
-
-common_words = list(freq.index)
-df['tweet_text'] = df['tweet_text'].apply(lambda x: " ".join(x for x in x.split() if x not in common_words))
 
 # lemmatization
 df['tweet_text'] = df['tweet_text'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
